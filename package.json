@@ -1,0 +1,21 @@
+{
+  "name": "fxchain",
+  "version": "0.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "=5.9.0"
+  },
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "start": "node src/index.js"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "env": {
+      "node": true,
+      "es6": true
+    }
+  },
+  "author": "Wolfgang Wedemeyer <wolf@okwolf.com>",
+  "license": "MIT"
+}
