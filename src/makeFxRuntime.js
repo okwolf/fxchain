@@ -9,7 +9,8 @@ const makeQueue = (queue = []) => ({
 
 module.exports = ({
   state: initialState = {},
-  merge = (lastState, nextState) => nextState
+  mergeState = (lastState, nextState) => nextState,
+  mapProps = props => props
 } = {}) => {
   const concurrentFxWaiting = new Set();
   const concurrentFxRunning = new Set();
@@ -19,7 +20,7 @@ module.exports = ({
   let state = initialState;
 
   const runFx = fx => {
-    const props = fx.props || {};
+    const props = mapProps(fx.props || {});
     runningFx.add(fx);
     const dispatchProxy = dispatched => {
       if (runningFx.has(fx)) {
@@ -77,7 +78,7 @@ module.exports = ({
       }
       process.nextTick(fxLoop);
     } else if (isObj(dispatched)) {
-      state = merge(state, dispatched);
+      state = mergeState(state, dispatched);
     }
   };
 

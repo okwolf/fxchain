@@ -4,7 +4,8 @@ const assign = (...args) => Object.assign({}, ...args);
 
 const { dispatch } = makeFxRuntime({
   state: { initial: "state" },
-  merge: assign
+  mergeState: assign,
+  mapProps: props => assign(props, { added: "prop" })
 });
 
 const logEffect = (dispatch, { message }) => {
@@ -30,7 +31,15 @@ const delay = props => ({
   props
 });
 
-dispatch([() => ({ counter: 0 }), logState({ message: "log 1" })]);
+dispatch([{ counter: 0 }, logState({ message: "log 1" })]);
+dispatch({
+  run: (dispatch, props) => {
+    dispatch({ extra: props.added });
+  },
+  props: {
+    concurrent: true
+  }
+});
 dispatch(
   delay({
     concurrent: true,
