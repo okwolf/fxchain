@@ -13,7 +13,10 @@ const logEffect = (dispatch, { message }) => {
     console.log(message, state);
   });
 };
-const logState = options => [logEffect, options];
+const logState = props => ({
+  run: logEffect,
+  props
+});
 
 const delayEffect = (dispatch, { ms, action }) =>
   new Promise(resolve =>
@@ -22,9 +25,12 @@ const delayEffect = (dispatch, { ms, action }) =>
       resolve();
     }, ms)
   );
-const delay = options => [delayEffect, options];
+const delay = props => ({
+  run: delayEffect,
+  props
+});
 
-dispatch(() => ({ counter: 0 }));
+dispatch([() => ({ counter: 0 }), logState({ message: "log 1" })]);
 dispatch(
   delay({
     concurrent: true,
@@ -33,7 +39,6 @@ dispatch(
   })
 );
 dispatch(logState({ message: "log after", after: true }));
-dispatch(logState({ message: "log 1" }));
 dispatch(
   delay({
     concurrent: false,

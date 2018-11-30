@@ -1,3 +1,5 @@
+const { isFn, isArray, isFx, isObj } = require("./utils");
+
 const makeQueue = (queue = []) => ({
   enqueue: queue.push.bind(queue),
   dequeue: queue.shift.bind(queue),
@@ -17,14 +19,14 @@ module.exports = ({
   let state = initialState;
 
   const runFx = fx => {
-    const props = fx[1] || {};
+    const props = fx.props || {};
     runningFx.add(fx);
     const dispatchProxy = dispatched => {
       if (runningFx.has(fx)) {
         dispatch(dispatched);
       }
     };
-    const fxPromise = fx[0](dispatchProxy, props) || Promise.resolve();
+    const fxPromise = fx.run(dispatchProxy, props) || Promise.resolve();
     return new Promise(resolve => {
       const done = () => {
         runningFx.delete(fx);
@@ -58,10 +60,12 @@ module.exports = ({
   };
 
   const dispatch = dispatched => {
-    if (typeof dispatched === "function") {
+    if (isFn(dispatched)) {
       dispatch(dispatched(state));
-    } else if (Array.isArray(dispatched)) {
-      const props = dispatched[1] || {};
+    } else if (isArray(dispatched)) {
+      dispatched.forEach(dispatch);
+    } else if (isFx(dispatched)) {
+      const props = dispatched.props || {};
       if (props.cancel) {
         runFx(dispatched);
       } else if (props.concurrent) {
@@ -72,7 +76,7 @@ module.exports = ({
         serialFxQueue.enqueue(dispatched);
       }
       process.nextTick(fxLoop);
-    } else if (dispatched) {
+    } else if (isObj(dispatched)) {
       state = merge(state, dispatched);
     }
   };
